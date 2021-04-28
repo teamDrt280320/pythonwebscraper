@@ -60,10 +60,10 @@ def progress():
                 i=i+1
                 yield "data:" + str(int(round((i/len(sites))*100))) + "\n\n"
                 yield "title:" + 'Fetching Data' + "\n\n"
-                if(i==1):
-                    break
+                
         ##        
     return Response(generate(), mimetype= 'text/event-stream')
+    
 
 #delete previous data
 def delete_collection(coll_ref, batch_size):
