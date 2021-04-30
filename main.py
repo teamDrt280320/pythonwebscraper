@@ -7,10 +7,27 @@ import firebase_admin
 from firebase_admin import credentials,firestore
 import time
 
+app = Flask(__name__)
 cred = credentials.Certificate("credentials.json")
 firebase_admin.initialize_app(cred)
 firestore_db=firestore.client()
-app = Flask(__name__)
+
+
+#fetch top Stores
+@app.route('/top-stores')
+def fetchTopStores():
+    url='https://www.grabon.in/'
+    r = requests.get(url)          
+    soup = BeautifulSoup(r.text, "html.parser")
+    topcpnimgsrcs=soup.find_all('a',{'class':'go-popstore'})
+    for topcpnimgsrc in topcpnimgsrcs:
+        topcpnobj={}
+        topcpnobj['storeurl']=topcpnimgsrc['href']
+        topcpnobj['logosrc']=topcpnimgsrc.find('img')['data-original']
+        firestore_db.collection('topproducts').add(topcpnobj)
+    #print(topcpnimgsrc)
+    return {'statuscode':'200','message':'done'}
+
 #rendering data
 @app.route('/fetch')
 def fetchData():            
@@ -24,10 +41,8 @@ def progress():
         sites=abc.getElementsByTagName("url")
         result=[]
         i=1
-
         ##
         delete_collection(firestore_db.collection('coupons'), 100)
-
         ##
         for site in sites:
             for loc in site.getElementsByTagName("loc"):
